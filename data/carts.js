@@ -19,7 +19,7 @@ function savetoStorage() {
 
 // function to add items to cart and updates cart quantity
 export let cartQuantity = 0; 
-export function addToCart(productId) {
+export function addToCart(productId, quantityItems) {
   let matchingItem; 
     // add items to the cart - for now only one at a time
     cart.forEach((cartItem) => {
@@ -29,15 +29,15 @@ export function addToCart(productId) {
     });
 
     if(matchingItem) {
-      matchingItem.quantity += 1;
-      cartQuantity += 1;
+      matchingItem.quantity += quantityItems;
+      cartQuantity += quantityItems;
     }
     else {
       cart.push({
             productId: productId,
-            quantity: 1 
+            quantity: quantityItems 
         });
-      cartQuantity += 1;
+      cartQuantity += quantityItems;
     }
     savetoStorage();
 }
