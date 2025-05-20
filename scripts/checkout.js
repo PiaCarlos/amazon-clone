@@ -1,26 +1,40 @@
-import {cart, removeFromCart} from '../data/carts.js';
+import { cart, removeFromCart } from '../data/carts.js';
 import { products } from '../data/products.js';
-import {formatCurrency} from './utils/money.js'
+import { formatCurrency } from './utils/money.js'
+import { deliveryOptions } from '../data/deliveryOptions.js'
 
 
 function makeCartSummary(cart) {
-let cartSummaryHTML = '';
-cart.forEach((cartitem) => {
-  const productId = cartitem.productId;
-  // get the product from products
-  // now we have the info from it
-  let matchingProduct;
-  products.forEach ((product) => {
-    if (product.id ===productId ) {
-      matchingProduct = product;
-    }
-  });
+  let cartSummaryHTML = '';
+  cart.forEach((cartitem) => {
+    const productId = cartitem.productId;
+    // get the product from products
+    // now we have the info from it
+    let matchingProduct;
+    products.forEach((product) => {
+      if (product.id === productId) {
+        matchingProduct = product;
+      }
+    });
 
-  const html = 
-    `
+    // get date
+    const deliveryOptionId = cartitem.deliveryOptionId;
+    let deliveryOption; 
+    deliveryOptions.forEach((option) => {
+      if (option.id === deliveryOptionId) {
+        deliveryOption = option;
+      }
+    }); 
+
+    const today = dayjs();
+    const deliveryDate = today.add(deliveryOption.deliveryDays, 'days' ); 
+    const dateString = deliveryDate.format('dddd, MMMM D');
+
+    const html =
+      `
   <div class="cart-item-container js-cart-item-container-${matchingProduct.id}">
               <div class="delivery-date">
-                Delivery date: Tuesday, June 21
+                Delivery date: ${dateString}
               </div>
 
               <div class="cart-item-details-grid">
@@ -32,7 +46,7 @@ cart.forEach((cartitem) => {
                     ${matchingProduct.name}
                   </div>
                   <div class="product-price">
-                    ${formatCurrency(matchingProduct.priceCents) }
+                    ${formatCurrency(matchingProduct.priceCents)}
                   </div>
                   <div class="product-quantity">
                     <span>
@@ -51,58 +65,57 @@ cart.forEach((cartitem) => {
                   <div class="delivery-options-title">
                     Choose a delivery option:
                   </div>
-                  <div class="delivery-option">
-                    <input type="radio" checked
-                      class="delivery-option-input"
-                      name="delivery-option-${productId}">
-                    <div>
-                      <div class="delivery-option-date">
-                        Tuesday, June 21
-                      </div>
-                      <div class="delivery-option-price">
-                        FREE Shipping
-                      </div>
-                    </div>
-                  </div>
-                  <div class="delivery-option">
-                    <input type="radio"
-                      class="delivery-option-input"
-                      name="delivery-option-${productId}">
-                    <div>
-                      <div class="delivery-option-date">
-                        Wednesday, June 15
-                      </div>
-                      <div class="delivery-option-price">
-                        $4.99 - Shipping
-                      </div>
-                    </div>
-                  </div>
-                  <div class="delivery-option">
-                    <input type="radio"
-                      class="delivery-option-input"
-                      name="delivery-option-${productId}">
-                    <div>
-                      <div class="delivery-option-date">
-                        Monday, June 13
-                      </div>
-                      <div class="delivery-option-price">
-                        $9.99 - Shipping
-                      </div>
-                    </div>
-                  </div>
+                  ${deliveryOptionsHTML(matchingProduct, cartitem)}
                 </div>
               </div>
             </div>
 
     `;
 
-  cartSummaryHTML += html;
-});
-return cartSummaryHTML;
+    cartSummaryHTML += html;
+  });
+  return cartSummaryHTML;
+}
+
+
+// get the delivery times and dates
+function deliveryOptionsHTML(matchingProduct, cartitem) {
+  let html = '';
+  deliveryOptions.forEach((deliveryOption) => {
+    const today = dayjs();
+    const deliveryDate = today.add(deliveryOption.deliveryDays, 'days' ); 
+    const dateString = deliveryDate.format('dddd, MMMM D');
+    const priceCents = deliveryOption.priceCents;
+    const priceString = priceCents === 0 
+    ? 'FREE'
+    : `$ ${formatCurrency(priceCents)} -`;
+    const isChecked = deliveryOption.id === cartitem.deliveryOptionId;
+    
+    html += `
+      <div class="delivery-option">
+           <input type="radio"
+           ${isChecked ? 'checked': ''}
+           class="delivery-option-input"
+             name="delivery-option-${matchingProduct.id}">
+             <div>
+             <div class="delivery-option-date">
+              ${dateString}
+             </div>
+               <div class="delivery-option-price">
+               ${priceString} - Shipping
+              </div>
+            </div>
+          </div>    
+      
+    `
+  }); 
+
+  return html;
+
 }
 
 let cartSummaryHTML = makeCartSummary(cart);
-document.querySelector('.js-order-summary').innerHTML = cartSummaryHTML; 
+document.querySelector('.js-order-summary').innerHTML = cartSummaryHTML;
 
 document.querySelectorAll('.js-delete-link').forEach(link => {
   link.addEventListener('click', () => {
