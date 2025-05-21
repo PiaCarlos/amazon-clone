@@ -1,16 +1,16 @@
 class Cart {
     cartItems = undefined;
     cartQuantity =  0;
-    LocalStorageKey = undefined;
+    #LocalStorageKey = undefined;
 
     constructor(localStorageKey) {
-    this.LocalStorageKey = localStorageKey;
-    this.loadFromStorage();
+    this.#LocalStorageKey = localStorageKey;
+    this.#loadFromStorage();
 
     }
 
-    loadFromStorage() {
-        this.cartItems = JSON.parse(localStorage.getItem(this.LocalStorageKey));
+    #loadFromStorage() {
+        this.cartItems = JSON.parse(localStorage.getItem(this.#LocalStorageKey));
 
         if (!this.cartItems) {
             this.cartItems = [{
@@ -29,7 +29,7 @@ class Cart {
 
     // save to storage
     savetoStorage() {
-        localStorage.setItem(this.LocalStorageKey, JSON.stringify(this.cartItems));
+        localStorage.setItem(this.#LocalStorageKey, JSON.stringify(this.cartItems));
     }
 
     // function to add items to cart and updates cart quantity
